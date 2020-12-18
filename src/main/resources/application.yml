@@ -1,0 +1,17 @@
+server:
+  servlet:
+    context-path: /api
+
+spring:
+  profiles:
+    active: dev
+
+#日志级别配置
+logging:
+  level:
+    tk:
+      mybatis: DEBUG
+    com:
+      haizhi:
+        datatransfor:
+          mapper: DEBUG

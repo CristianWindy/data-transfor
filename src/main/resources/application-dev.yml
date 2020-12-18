@@ -1,0 +1,9 @@
+server:
+  port: 8110
+
+bdp:
+  url: https://www.bdp.cn
+
+json:
+  rpc:
+    sourceId: 123123123123
