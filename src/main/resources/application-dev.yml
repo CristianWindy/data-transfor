@@ -1,9 +1,15 @@
 server:
   port: 8110
 
-bdp:
-  url: https://www.bdp.cn
+#公安网访问地址
+backend:
+  url:
+    bdp: https://www.bdp.cn
+    pushCenter: http://39.106.114.130:8090
 
-json:
-  rpc:
-    sourceId: 123123123123
+#网关中心地址
+api:
+  #二类网网关中心地址
+  gateway_second: http://20.60.1.178:20001
+  #三类网网关中心地址
+  gateway_three: http://10.136.9.52:8092

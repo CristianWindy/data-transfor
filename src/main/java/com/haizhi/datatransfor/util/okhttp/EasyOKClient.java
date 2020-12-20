@@ -2,6 +2,7 @@ package com.haizhi.datatransfor.util.okhttp;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
+import com.alibaba.fastjson.parser.ParserConfig;
 import com.google.common.collect.Maps;
 import com.haizhi.datatransfor.util.okhttp.ssl.TrustAllCerts;
 import lombok.extern.slf4j.Slf4j;
@@ -13,10 +14,12 @@ import org.springframework.stereotype.Component;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLSocketFactory;
 import javax.net.ssl.TrustManager;
+import javax.servlet.http.HttpServletResponse;
 import java.nio.charset.StandardCharsets;
 import java.security.SecureRandom;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
+import java.util.function.BiConsumer;
 
 /**
  * @Author CoderJiA
@@ -155,8 +158,25 @@ public class EasyOKClient {
 
     public <T> T jsonPost(String url, Map<String, Object> params, Map<String, Object> headers, Class<T> clazz) {
         headers.put(CONTENT_TYPE_KEY, CONTENT_TYPE_JSON);
-        log.info("post请求参数：{}", params);
+        log.info("EasyOKClient请求post参数：{}", params);
         return post(url, getRequestBody(JSON.toJSONString(params).getBytes(StandardCharsets.UTF_8), headers), headers, clazz);
+    }
+
+    public <T> T jsonPost(String url, Object object, Class<T> clazz, HttpServletResponse httpServletResponse, Integer source) {
+        Map<String, Object> headers = new HashMap<>();
+        headers.put(CONTENT_TYPE_KEY, CONTENT_TYPE_JSON);
+        log.info("EasyOKClient请求post参数：{}", object);
+
+        RequestBody body = getRequestBody(JSON.toJSONString(object).getBytes(StandardCharsets.UTF_8), headers);
+
+        HttpUrl.Builder httpBuilder = Objects.requireNonNull(HttpUrl.parse(url)).newBuilder();
+        Request.Builder requestBuilder = new Request.Builder().post(body).url(httpBuilder.build());
+
+//        JSON.parseObject(send(requestBuilder, headers), clazz);
+
+        return JSON.parseObject(send(requestBuilder, headers, httpServletResponse, source), clazz);
+
+//        return post(url, getRequestBody(JSON.toJSONString(object).getBytes(StandardCharsets.UTF_8), headers), headers, clazz);
     }
 
     /**
@@ -179,6 +199,22 @@ public class EasyOKClient {
                 .post(formBody)
                 .url(url);
         return JSON.parseObject(send(request, headers), clazz);
+    }
+
+    public <T> T w3FormPost(String url, Map<String, Object> params, Map<String, Object> headers, Class<T> clazz, HttpServletResponse httpServletResponse, Integer source) {
+        headers.put(CONTENT_TYPE_KEY, CONTENT_TYPE_W3FORM);
+        FormBody.Builder formBodyBuilder = new FormBody.Builder();
+        Set<String> keySet = params.keySet();
+        for (String key : keySet) {
+            String value = String.valueOf(params.get(key));
+            formBodyBuilder.add(key, value);
+        }
+        FormBody formBody = formBodyBuilder.build();
+        Request.Builder request = new Request
+                .Builder()
+                .post(formBody)
+                .url(url);
+        return JSON.parseObject(send(request, headers, httpServletResponse, source), clazz);
     }
 
 
@@ -257,6 +293,9 @@ public class EasyOKClient {
     }
 
     private String send(Request.Builder requestBuilder, Map<String, Object> headers) {
+        log.info("调用远程接口【" + requestBuilder.build().url().toString() + "】");
+        log.info("请求方法" + requestBuilder.build().method());
+        log.info("请求体" + requestBuilder.build().body().toString());
         Response response;
         try {
             Optional.ofNullable(headers)
@@ -265,6 +304,43 @@ public class EasyOKClient {
         } catch (Exception ex) {
             throw new RuntimeException("调用远程接口【" + requestBuilder.build().url().toString() + "】失败", ex);
         }
+        try {
+            assert response.body() != null;
+            String responseStr = response.body().string();
+            log.info("EasyOKClient请求返回值：{}", responseStr);
+            return responseStr;
+        } catch (Exception e) {
+            throw new RuntimeException("请求接口【" + requestBuilder.build().url() + "】失败", e);
+        }
+    }
+
+    private String send(Request.Builder requestBuilder, Map<String, Object> headers, HttpServletResponse httpServletResponse, Integer source) {
+        log.info("调用远程接口【" + requestBuilder.build().url().toString() + "】");
+        log.info("请求方法" + requestBuilder.build().method());
+        log.info("请求体" + requestBuilder.build().body().toString());
+        Response response;
+        try {
+            Optional.ofNullable(headers)
+                    .ifPresent(its -> its.forEach((key, value) -> requestBuilder.header(key, value.toString())));
+            response = httpClient.newCall(requestBuilder.build()).execute();
+        } catch (Exception ex) {
+            throw new RuntimeException("调用远程接口【" + requestBuilder.build().url().toString() + "】失败", ex);
+        }
+        Headers responseHeaders = response.headers();
+
+        if (source == 0) {
+            List<String> values = responseHeaders.values("Set-Cookie");
+            values.forEach(data -> {
+                httpServletResponse.addHeader("Set-Cookie", data);
+            });
+        } else {
+            for (int i = 0; i < responseHeaders.size(); i++) {
+                String headerName = responseHeaders.name(i);
+                String headerValue = responseHeaders.get(headerName);
+                httpServletResponse.addHeader(headerName, headerValue);
+            }
+        }
+
         try {
             assert response.body() != null;
             String responseStr = response.body().string();

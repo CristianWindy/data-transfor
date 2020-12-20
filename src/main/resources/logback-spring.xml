@@ -8,7 +8,9 @@
     <appender name="consoleLog" class="ch.qos.logback.core.ConsoleAppender">
         <!--展示格式 layout-->
         <layout class="ch.qos.logback.classic.PatternLayout">
-            <pattern>%d{HH:mm:ss.SSS} ${logback.app} [%thread] %-5level %logger{36} - %mdc{client} [%X{trace_id}] %msg%n</pattern>
+            <pattern>%d{HH:mm:ss.SSS} ${logback.app} [%thread] %-5level %logger{36} - %mdc{client} [%X{trace_id}]
+                %msg%n
+            </pattern>
         </layout>
     </appender>
 
