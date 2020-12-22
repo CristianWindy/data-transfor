@@ -22,10 +22,17 @@ public class MobPostService {
     @Value("${backend.url.pushCenter}")
     private String pushCenterUrl;
 
+    @Value("${backend.url.tupu_login}")
+    private String tupuLoginUrl;
+    @Value("${backend.url.tupu_business}")
+    private String tupuBusinessUrl;
+
+
     @Autowired
     private EasyOKClient okClient;
 
     public String query(RequestBean bean, HttpServletRequest request, HttpServletResponse response) {
+        log.info("MobPostService:获取到总线转发的请求："+bean);
         String result = "";
         if ("get".equals(bean.getMethod())) {
             result = dealWithGetMethod(bean, request, response);
@@ -36,26 +43,17 @@ public class MobPostService {
     }
 
     private String dealWithPostMethod(RequestBean bean, HttpServletRequest request, HttpServletResponse response) {
-        String path = "";
+
+        String url = "";
+
         //BDP
-        switch (bean.getSource()) {
-            case 0:
-                path = bdpUrl;
-                break;
-            case 1:
-                path = pushCenterUrl;
-                break;
-            default:
-                path = bdpUrl;
-                break;
-        }
-        String url = path + "/" + bean.getPath();
+        url = getRealityQueryPath(bean);
 
         String result = "";
         switch (bean.getContentType()) {
             //json
             case 0:
-                result = okClient.jsonPost(url, bean.getRequestMap(), bean.getHeaderMap(), String.class);
+                result = okClient.jsonPost(url, bean.getRequestMap(), bean.getHeaderMap(), String.class, response, bean.getSource());
                 break;
             //x-www-form
             case 1:
@@ -65,16 +63,40 @@ public class MobPostService {
             case 2:
 
                 break;
-            default:
-
-                break;
         }
 
         return result;
     }
 
-    private String dealWithGetMethod(RequestBean bean, HttpServletRequest request, HttpServletResponse response) {
+    private String getRealityQueryPath(RequestBean bean) {
+        String path="";
+        String url="";
+        switch (bean.getSource()) {
+            case 0:
+                path = bdpUrl;
+                url = path + "/" + bean.getPath();
+                break;
+            case 1:
+                path = pushCenterUrl;
+                url = path + bean.getPath();
+                break;
+            case 2:
+                path = tupuLoginUrl;
+                url = path + bean.getPath();
+                break;
+            case 3:
+                path = tupuBusinessUrl;
+                url = path + bean.getPath();
+                break;
+        }
+        return url;
+    }
 
-        return null;
+    private String dealWithGetMethod(RequestBean bean, HttpServletRequest request, HttpServletResponse response) {
+        String url = getRealityQueryPath(bean);
+
+        String result = okClient.get(url, bean.getRequestMap(), bean.getHeaderMap(), String.class, response, bean.getSource());
+
+        return result;
     }
 }

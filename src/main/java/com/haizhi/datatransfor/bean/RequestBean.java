@@ -1,9 +1,6 @@
 package com.haizhi.datatransfor.bean;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.util.Map;
 
@@ -15,6 +12,7 @@ import java.util.Map;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
+@ToString
 public class RequestBean {
     //请求方法：get，post
     private String method;

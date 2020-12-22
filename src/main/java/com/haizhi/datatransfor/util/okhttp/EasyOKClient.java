@@ -137,6 +137,23 @@ public class EasyOKClient {
         return JSON.parseObject(send(requestBuilder, headers), clazz);
     }
 
+
+    public <T> T get(String url, Map<String, Object> queryParams, Map<String, Object> headers, Class<T> clazz,
+                     HttpServletResponse response, Integer source) {
+        log.info("EasyOKClient请求地址：{}", url);
+        log.info("EasyOKClient请求参数：{}", queryParams);
+        log.info("EasyOKClient请求头：{}", headers);
+
+        HttpUrl.Builder httpBuilder = Objects.requireNonNull(HttpUrl.parse(url)).newBuilder();
+        // 设置参数
+        Optional.ofNullable(queryParams)
+                .ifPresent(its -> its.forEach((key, value) -> httpBuilder.addQueryParameter(key, value.toString())));
+        // 创建请求
+        Request.Builder requestBuilder = new Request.Builder().get().url(httpBuilder.build());
+
+        return JSON.parseObject(send(requestBuilder, headers, response, source), clazz);
+    }
+
     /**
      * post
      * content-type: application/json
@@ -162,6 +179,19 @@ public class EasyOKClient {
         return post(url, getRequestBody(JSON.toJSONString(params).getBytes(StandardCharsets.UTF_8), headers), headers, clazz);
     }
 
+    public <T> T jsonPost(String url, Map<String, Object> params, Map<String, Object> headers,
+                          Class<T> clazz, HttpServletResponse httpServletResponse, Integer source) {
+        headers.put(CONTENT_TYPE_KEY, CONTENT_TYPE_JSON);
+        log.info("EasyOKClient请求post参数：{}", params);
+
+        RequestBody body = getRequestBody(JSON.toJSONString(params).getBytes(StandardCharsets.UTF_8), headers);
+
+        HttpUrl.Builder httpBuilder = Objects.requireNonNull(HttpUrl.parse(url)).newBuilder();
+        Request.Builder requestBuilder = new Request.Builder().post(body).url(httpBuilder.build());
+
+        return JSON.parseObject(send(requestBuilder, headers, httpServletResponse, source), clazz);
+    }
+
     public <T> T jsonPost(String url, Object object, Class<T> clazz, HttpServletResponse httpServletResponse, Integer source) {
         Map<String, Object> headers = new HashMap<>();
         headers.put(CONTENT_TYPE_KEY, CONTENT_TYPE_JSON);
@@ -172,11 +202,7 @@ public class EasyOKClient {
         HttpUrl.Builder httpBuilder = Objects.requireNonNull(HttpUrl.parse(url)).newBuilder();
         Request.Builder requestBuilder = new Request.Builder().post(body).url(httpBuilder.build());
 
-//        JSON.parseObject(send(requestBuilder, headers), clazz);
-
         return JSON.parseObject(send(requestBuilder, headers, httpServletResponse, source), clazz);
-
-//        return post(url, getRequestBody(JSON.toJSONString(object).getBytes(StandardCharsets.UTF_8), headers), headers, clazz);
     }
 
     /**
@@ -277,9 +303,9 @@ public class EasyOKClient {
                     stringBuffer.append(val).append("; ");
                 }
             }
-            if (stringBuffer.length() > 0) {
+            /*if (stringBuffer.length() > 0) {
                 stringBuffer.append("domain=").append("haizhi").append(";");
-            }
+            }*/
 
 
             JSONObject object = new JSONObject();
@@ -317,7 +343,6 @@ public class EasyOKClient {
     private String send(Request.Builder requestBuilder, Map<String, Object> headers, HttpServletResponse httpServletResponse, Integer source) {
         log.info("调用远程接口【" + requestBuilder.build().url().toString() + "】");
         log.info("请求方法" + requestBuilder.build().method());
-        log.info("请求体" + requestBuilder.build().body().toString());
         Response response;
         try {
             Optional.ofNullable(headers)
@@ -363,6 +388,5 @@ public class EasyOKClient {
 
         return ssfFactory;
     }
-
 
 }

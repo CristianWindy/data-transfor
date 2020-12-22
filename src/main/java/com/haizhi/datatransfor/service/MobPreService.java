@@ -31,6 +31,7 @@ public class MobPreService {
     private EasyOKClient okClient;
 
     public String query(RequestBean bean, HttpServletRequest request, HttpServletResponse response) {
+        log.info("MobPreService:捕获移动端转发请求："+bean);
         String result = "";
         String path = bean.getPrePath();
         result = okClient.jsonPost(path, bean, String.class,response,bean.getSource());
@@ -38,6 +39,7 @@ public class MobPreService {
     }
 
     public ResponseBean refreshToken(String accessToken) {
+        log.info("MobPreService:捕获移动端刷新token请求："+accessToken);
         String path = secondApiGateway + "/oauth2-server/oauth/refresh";
 
         ResponseBean responseBean = new ResponseBean();
@@ -56,6 +58,7 @@ public class MobPreService {
     }
 
     public ResponseBean queryPath(String token, String packageName) {
+        log.info("MobPreService:捕获移动端获取请求路径请求：token="+token+"   packageName:"+packageName);
         String path = secondApiGateway + "/oauth2-server/app/address";
 
 
@@ -73,6 +76,7 @@ public class MobPreService {
     }
 
     public ResponseBean queryUserInfo(String token) {
+        log.info("MobPreService:捕获移动端获取用户请求："+token);
         String path = secondApiGateway + "/oauth2-server/oauth/user";
 
         ResponseBean responseBean = new ResponseBean();

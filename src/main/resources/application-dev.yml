@@ -6,7 +6,8 @@ backend:
   url:
     bdp: https://www.bdp.cn
     pushCenter: http://39.106.114.130:8090
-
+    tupu_login: http://192.168.1.234:10000
+    tupu_business: http://192.168.1.234:10000
 #网关中心地址
 api:
   #二类网网关中心地址
