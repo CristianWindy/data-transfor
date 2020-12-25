@@ -31,4 +31,6 @@ public class RequestBean {
     private Map<String, Object> requestMap;
 
     private String prePath;
+
+    private String accessToken;
 }

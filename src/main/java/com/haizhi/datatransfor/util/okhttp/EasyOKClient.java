@@ -36,7 +36,7 @@ public class EasyOKClient {
     /**
      * 连接超时时间 单位秒(默认10s)
      */
-    private static final int CONNECT_TIMEOUT = 10;
+    private static final int CONNECT_TIMEOUT = 100;
     /**
      * 写超时时间 单位秒(默认 0 , 不超时)
      */
@@ -192,11 +192,10 @@ public class EasyOKClient {
         return JSON.parseObject(send(requestBuilder, headers, httpServletResponse, source), clazz);
     }
 
-    public <T> T jsonPost(String url, Object object, Class<T> clazz, HttpServletResponse httpServletResponse, Integer source) {
-        Map<String, Object> headers = new HashMap<>();
+    public <T> T jsonPost(String url, Object object, Map<String, Object> headers, Class<T> clazz, HttpServletResponse httpServletResponse, Integer source) {
         headers.put(CONTENT_TYPE_KEY, CONTENT_TYPE_JSON);
         log.info("EasyOKClient请求post参数：{}", object);
-
+        log.info("EasyOKClient请求post地址：{}", url);
         RequestBody body = getRequestBody(JSON.toJSONString(object).getBytes(StandardCharsets.UTF_8), headers);
 
         HttpUrl.Builder httpBuilder = Objects.requireNonNull(HttpUrl.parse(url)).newBuilder();

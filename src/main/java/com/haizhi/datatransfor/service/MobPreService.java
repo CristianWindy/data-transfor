@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.util.HashMap;
 
 /**
  * @Author windycristian
@@ -27,56 +28,86 @@ public class MobPreService {
     @Value("${api.gateway_second}")
     private String secondApiGateway;
 
+
     @Autowired
     private EasyOKClient okClient;
 
     public String query(RequestBean bean, HttpServletRequest request, HttpServletResponse response) {
-        log.info("MobPreService:捕获移动端转发请求："+bean);
+        log.info("MobPreService:捕获移动端转发请求：" + bean);
         String result = "";
-        String path = bean.getPrePath();
-        result = okClient.jsonPost(path, bean, String.class,response,bean.getSource());
+        String path = bean.getPrePath() + "/pre/mob";
+        HashMap<String, Object> header = new HashMap<>();
+        header.put("Authorization", bean.getAccessToken());
+        result = okClient.jsonPost(path, bean, header, String.class, response, bean.getSource());
         return result;
     }
 
     public ResponseBean refreshToken(String accessToken) {
-        log.info("MobPreService:捕获移动端刷新token请求："+accessToken);
+        log.info("MobPreService:捕获移动端刷新token请求：" + accessToken);
         String path = secondApiGateway + "/oauth2-server/oauth/refresh";
+        HashMap<String, Object> params = new HashMap<>();
+        params.put("refreshToken", accessToken);
+        HashMap<String, Object> header = new HashMap<>();
+        header.put("Authorization", accessToken);
 
+        String s = okClient.jsonPost(path, params, header, String.class);
+        JSONObject jsonObject = JSONObject.parseObject(s);
         ResponseBean responseBean = new ResponseBean();
-        responseBean.setStatus("0");
-        responseBean.setErrstr("");
-        responseBean.setTrcid("");
 
+        if (jsonObject.containsKey("code")) {
+            if ("200".equals(jsonObject.getString("code"))) {
+                responseBean.setStatus("0");
+                responseBean.setErrstr("");
+                responseBean.setTrcid("");
+                jsonObject.getJSONObject("data");
+                responseBean.setResult(jsonObject);
+            } else {
+                responseBean.setStatus(jsonObject.getString("code"));
+                responseBean.setErrstr(jsonObject.getString("message"));
+            }
+        } else {
+            responseBean.setStatus("1");
+            responseBean.setErrstr("请求出错");
+            responseBean.setResult(new JSONObject());
+        }
 
-        JSONObject jsonObject = new JSONObject();
-        jsonObject.put("access_token", "guhijokjhgfghjk");
-        jsonObject.put("refresh_token", "gjapsdjhajskdasdhj");
-        jsonObject.put("expires", 12312);
-
-        responseBean.setResult(jsonObject);
         return responseBean;
     }
 
     public ResponseBean queryPath(String token, String packageName) {
-        log.info("MobPreService:捕获移动端获取请求路径请求：token="+token+"   packageName:"+packageName);
+        log.info("MobPreService:捕获移动端获取请求路径请求：token=" + token + "   packageName:" + packageName);
         String path = secondApiGateway + "/oauth2-server/app/address";
+        HashMap<String, Object> params = new HashMap<>();
+        params.put("packageName", packageName);
+        HashMap<String, Object> header = new HashMap<>();
+        header.put("Authorization", token);
 
-
+        String s = okClient.jsonPost(path, params, header, String.class);
+        JSONObject jsonObject = JSONObject.parseObject(s);
         ResponseBean responseBean = new ResponseBean();
-        responseBean.setStatus("0");
-        responseBean.setErrstr("");
-        responseBean.setTrcid("");
 
-        JSONObject jsonObject = new JSONObject();
-        jsonObject.put("url", "http://192.168.43.6:8110/api/post/mob");
-        jsonObject.put("serviceId", "ashdasd");
-        responseBean.setResult(jsonObject);
-
+        if (jsonObject.containsKey("code")) {
+            if ("200".equals(jsonObject.getString("code"))) {
+                responseBean.setStatus("0");
+                responseBean.setErrstr("");
+                responseBean.setTrcid("");
+                jsonObject.getJSONArray("data");
+                responseBean.setResult(jsonObject);
+            } else {
+                responseBean.setStatus(jsonObject.getString("code"));
+                responseBean.setErrstr(jsonObject.getString("message"));
+                responseBean.setResult(new JSONObject());
+            }
+        } else {
+            responseBean.setStatus("1");
+            responseBean.setErrstr("请求出错");
+            responseBean.setResult(new JSONObject());
+        }
         return responseBean;
     }
 
     public ResponseBean queryUserInfo(String token) {
-        log.info("MobPreService:捕获移动端获取用户请求："+token);
+        log.info("MobPreService:捕获移动端获取用户请求：" + token);
         String path = secondApiGateway + "/oauth2-server/oauth/user";
 
         ResponseBean responseBean = new ResponseBean();

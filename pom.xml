@@ -89,7 +89,7 @@
 	</dependencies>
 
 	<build>
-		<finalName>data-transform-nanchang</finalName>
+		<finalName>data-transform</finalName>
 		<plugins>
 			<plugin>
 				<groupId>org.springframework.boot</groupId>
