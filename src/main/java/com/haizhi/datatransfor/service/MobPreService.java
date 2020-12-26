@@ -28,6 +28,8 @@ public class MobPreService {
     @Value("${api.gateway_second}")
     private String secondApiGateway;
 
+    @Value("${url-suffix}")
+    private String urlSuffix;
 
     @Autowired
     private EasyOKClient okClient;
@@ -35,7 +37,7 @@ public class MobPreService {
     public String query(RequestBean bean, HttpServletRequest request, HttpServletResponse response) {
         log.info("MobPreService:捕获移动端转发请求：" + bean);
         String result = "";
-        String path = bean.getPrePath() + "/pre/mob";
+        String path = bean.getPrePath() + urlSuffix;
         HashMap<String, Object> header = new HashMap<>();
         header.put("Authorization", bean.getAccessToken());
         result = okClient.jsonPost(path, bean, header, String.class, response, bean.getSource());

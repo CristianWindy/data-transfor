@@ -32,7 +32,7 @@ public class MobPostService {
     private EasyOKClient okClient;
 
     public String query(RequestBean bean, HttpServletRequest request, HttpServletResponse response) {
-        log.info("MobPostService:获取到总线转发的请求："+bean);
+        log.info("MobPostService:获取到总线转发的请求：" + bean);
         String result = "";
         if ("get".equals(bean.getMethod())) {
             result = dealWithGetMethod(bean, request, response);
@@ -50,27 +50,33 @@ public class MobPostService {
         url = getRealityQueryPath(bean);
 
         String result = "";
-        switch (bean.getContentType()) {
-            //json
-            case 0:
-                result = okClient.jsonPost(url, bean.getRequestMap(), bean.getHeaderMap(), String.class, response, bean.getSource());
-                break;
-            //x-www-form
-            case 1:
-                result = okClient.w3FormPost(url, bean.getRequestMap(), bean.getHeaderMap(), String.class, response, bean.getSource());
-                break;
-            //form-data
-            case 2:
+        try {
+            switch (bean.getContentType()) {
+                //json
+                case 0:
+                    result = okClient.jsonPost(url, bean.getRequestMap(), bean.getHeaderMap(), String.class, response, bean.getSource());
+                    break;
+                //x-www-form
+                case 1:
+                    result = okClient.w3FormPost(url, bean.getRequestMap(), bean.getHeaderMap(), String.class, response, bean.getSource());
+                    break;
+                //form-data
+                case 2:
 
-                break;
+                    break;
+            }
+        } catch (Exception e) {
+            log.info("dealWithPostMethod:exception:{}", e.getMessage());
         }
+
+        log.info("result:{}", result);
 
         return result;
     }
 
     private String getRealityQueryPath(RequestBean bean) {
-        String path="";
-        String url="";
+        String path = "";
+        String url = "";
         switch (bean.getSource()) {
             case 0:
                 path = bdpUrl;

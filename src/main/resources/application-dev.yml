@@ -1,5 +1,14 @@
 server:
   port: 8110
+  #公安网关地址
+  url: http://10.136.9.52:8092
+  #tomcat启动线程数达到最大时接受排队的请求个数
+  tomcat:
+    acceptCount: 1000
+    #tomcat启动最大线程数
+    maxThreads: 1000
+    #tomcat最大连接数
+    maxConnections: 2000
 
 #公安网访问地址
 backend:
@@ -16,3 +25,26 @@ api:
   gateway_three: http://10.136.9.52:8092
   #注册服务名:
   serviceName: transform
+
+#服务名称全用小写字母或全用大写
+spring:
+  application:
+    name: transform
+  #设置跨域
+  mvc:
+    dispatch-options-request: true
+
+#服务ID
+serviceID: 05ae21ea61384da2b249083d5bcbe78e
+#服务密钥
+secretKey: af5829c95edf44e99b0ab1a74c3bba12
+
+#开启手动设置服务IP
+localswitch: true
+#服务IP
+localip: 47.49.27.38
+
+realityPath: http://localhost:8110/api/post/mob
+
+url-suffix: /api/post/mob
+

@@ -4,13 +4,11 @@ import com.haizhi.datatransfor.bean.RequestBean;
 import com.haizhi.datatransfor.service.MobPostService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.lang.reflect.Method;
 
 /**
  * @Author windycristian
@@ -23,11 +21,13 @@ public class MobPostController {
     @Autowired
     private MobPostService baseService;
 
-    @PostMapping("mob")
+    @RequestMapping(value = "mob",produces = "application/json; charset=utf-8",method = RequestMethod.POST)
     public String query(@RequestBody RequestBean body,
                         HttpServletRequest request,
                         HttpServletResponse response) {
 
-        return baseService.query(body,request,response);
+        String query = baseService.query(body, request, response);
+        log.info("query:{}", query);
+        return query;
     }
 }

@@ -103,7 +103,7 @@ public class EasyOKClient {
         builder.connectTimeout(connTimeout, TimeUnit.SECONDS);
         builder.readTimeout(readTimeout, TimeUnit.SECONDS);
         builder.writeTimeout(writeTimeout, TimeUnit.SECONDS);
-
+        builder.retryOnConnectionFailure(true);
         // 配置https
         builder.sslSocketFactory(createSSLSocketFactory());
         builder.hostnameVerifier((s, sslSession) -> true);
@@ -348,22 +348,23 @@ public class EasyOKClient {
                     .ifPresent(its -> its.forEach((key, value) -> requestBuilder.header(key, value.toString())));
             response = httpClient.newCall(requestBuilder.build()).execute();
         } catch (Exception ex) {
+
             throw new RuntimeException("调用远程接口【" + requestBuilder.build().url().toString() + "】失败", ex);
         }
         Headers responseHeaders = response.headers();
 
-        if (source == 0) {
+        if (source == 0 || source == 1 || source == 2) {
             List<String> values = responseHeaders.values("Set-Cookie");
             values.forEach(data -> {
                 httpServletResponse.addHeader("Set-Cookie", data);
             });
-        } else {
+        } /*else {
             for (int i = 0; i < responseHeaders.size(); i++) {
                 String headerName = responseHeaders.name(i);
                 String headerValue = responseHeaders.get(headerName);
                 httpServletResponse.addHeader(headerName, headerValue);
             }
-        }
+        }*/
 
         try {
             assert response.body() != null;
