@@ -1,14 +1,19 @@
 package com.haizhi.datatransfor.service;
 
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
+import com.haizhi.datatransfor.Base64ImgUtil;
 import com.haizhi.datatransfor.bean.RequestBean;
 import com.haizhi.datatransfor.util.okhttp.EasyOKClient;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import sun.misc.BASE64Decoder;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
 
 /**
  * @Author windycristian
@@ -26,7 +31,6 @@ public class MobPostService {
     private String tupuLoginUrl;
     @Value("${backend.url.tupu_business}")
     private String tupuBusinessUrl;
-
 
     @Autowired
     private EasyOKClient okClient;
@@ -94,15 +98,40 @@ public class MobPostService {
                 path = tupuBusinessUrl;
                 url = path + bean.getPath();
                 break;
+            case 4:
+                url = bean.getPath();
         }
         return url;
     }
 
     private String dealWithGetMethod(RequestBean bean, HttpServletRequest request, HttpServletResponse response) {
         String url = getRealityQueryPath(bean);
-
-        String result = okClient.get(url, bean.getRequestMap(), bean.getHeaderMap(), String.class, response, bean.getSource());
+        String result = "";
+        if (bean.getSource() == 4) {
+            result = dealImage(url);
+        } else {
+            result = okClient.get(url, bean.getRequestMap(), bean.getHeaderMap(), String.class, response, bean.getSource());
+        }
 
         return result;
+    }
+
+    public String dealImage(String imageUrl) {
+        BASE64Decoder decoder = new BASE64Decoder();
+        String path = null;
+        try {
+            path = new String(decoder.decodeBuffer(imageUrl), "UTF-8");
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        String s = Base64ImgUtil.encodeImageToBase64(path);
+        JSONObject jsonObject = new JSONObject();
+        jsonObject.put("status", 0);
+        jsonObject.put("msg", "OK");
+        JSONObject data = new JSONObject();
+        data.put("imageSource", s);
+        jsonObject.put("data", data);
+
+        return JSON.toJSONString(jsonObject);
     }
 }

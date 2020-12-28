@@ -22,7 +22,7 @@ public class RequestBean {
     //0-bdp,1-pushCenter
     private Integer source;
 
-    //请求方式
+    //请求方式  0-application/json，1-x-www-form-urlencoded，2-multipart/form-data
     private Integer contentType;
 
     //请求头
