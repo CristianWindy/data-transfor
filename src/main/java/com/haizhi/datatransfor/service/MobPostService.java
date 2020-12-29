@@ -124,7 +124,27 @@ public class MobPostService {
         } catch (IOException e) {
             e.printStackTrace();
         }
-        String s = Base64ImgUtil.encodeImageToBase64(path);
+
+        String s = Base64ImgUtil.encodeImageToBase64(Base64ImgUtil.downloadPicture(path));
+        JSONObject jsonObject = new JSONObject();
+        jsonObject.put("status", 0);
+        jsonObject.put("msg", "OK");
+        JSONObject data = new JSONObject();
+        data.put("imageSource", s);
+        jsonObject.put("data", data);
+
+        return JSON.toJSONString(jsonObject);
+    }
+
+    public String scaleDealImage(String imageUrl) {
+        BASE64Decoder decoder = new BASE64Decoder();
+        String path = null;
+        try {
+            path = new String(decoder.decodeBuffer(imageUrl), "UTF-8");
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        String s = Base64ImgUtil.compressEncodeImageToBase64(Base64ImgUtil.downloadPicture(path));
         JSONObject jsonObject = new JSONObject();
         jsonObject.put("status", 0);
         jsonObject.put("msg", "OK");

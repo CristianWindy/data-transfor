@@ -107,24 +107,4 @@ public class MobPreService {
         }
         return responseBean;
     }
-
-    public ResponseBean queryUserInfo(String token) {
-        log.info("MobPreService:捕获移动端获取用户请求：" + token);
-        String path = secondApiGateway + "/oauth2-server/oauth/user";
-
-        ResponseBean responseBean = new ResponseBean();
-        responseBean.setStatus("0");
-        responseBean.setErrstr("");
-        responseBean.setTrcid("");
-
-        JSONObject jsonObject = new JSONObject();
-        jsonObject.put("idCard", "342423199009104496");
-        jsonObject.put("packageName", "com.haizhi.ml");
-        jsonObject.put("deptcode", "3600000001");
-        jsonObject.put("userid", "911120");
-        jsonObject.put("deptName", "测试机构");
-        jsonObject.put("username", "buzhidao");
-        responseBean.setResult(jsonObject);
-        return responseBean;
-    }
 }

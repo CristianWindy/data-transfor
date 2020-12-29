@@ -60,14 +60,4 @@ public class MobPreController {
         return baseService.queryPath(token, packageName);
     }
 
-    /**
-     * 获取用户信息
-     *
-     * @param accessToken
-     * @return
-     */
-    @GetMapping("query_user")
-    public ResponseBean queryUserInfo(@RequestParam String accessToken) {
-        return baseService.queryUserInfo(accessToken);
-    }
 }

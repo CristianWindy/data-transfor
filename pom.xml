@@ -333,6 +333,12 @@
 			</exclusions>
 			<version>0.10</version>
 		</dependency>
+
+		<dependency>
+			<groupId>net.coobird</groupId>
+			<artifactId>thumbnailator</artifactId>
+			<version>0.4.3</version>
+		</dependency>
 	</dependencies>
 
 	<build>
